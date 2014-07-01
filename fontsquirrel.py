@@ -1,9 +1,26 @@
 #!/usr/bin/env python3
 
-# I'll try to retrieve all fonts available freely from fontsquirrel
-
-# Api DOCS: <http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api>
-# import localjson  # Retrieve json data:  localjson.get_json()
+#   File: fontsquirrel.py
+#   Abstract class for downloading fonts from fontsquirrel
+#
+#   This file is part of fontsquirrel_downloader
+#   Pimagizer (C) 2014 Víctor Fernández Rico <vfrico@gmail.com>
+#
+#   This is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published
+#   by the Free Software Foundation, either version 3 of the License,
+#   or (at your option) any later version.
+#
+#   Pimagizer is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program. If not, see <http://www.gnu.org/licenses/>
+#
+# MORE INFO:
+#   Api DOCS: <http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api>
 import json
 import shutil
 import os
@@ -17,7 +34,12 @@ logging.basicConfig(level=logging.DEBUG)
 
 class FontSquirrel():
     def get_all_families(self, destination):
-        # Given a folder, download to it all font squirrel fonts available
+        """
+        This function allows to user get all families
+        availables on FontSquirrel and download them to
+        a given folder.
+        Returns: Full path of folder containing the fonts
+        """
         all_data = self.all_json_data()
 
         if destination == "":
@@ -35,15 +57,17 @@ class FontSquirrel():
             destination = self.download_to(
                 download_uri, "tmp/%s.zip" % former_name)
 
-            print(destination)
-
+            # Extract all files from zip
             zip_file = zipfile.ZipFile(destination)
-            print(font_filename)
             for filename in font_filename:
                 zip_file.extract(filename, path=destination+url_name)
 
-    def get_family(self,familia, destino):
-        # Given a font family, downloads from font squirrel to folder
+            return destination
+
+    def get_family(self, familia, destino):
+        """
+        Given a font family, downloads it from font squirrel to folder
+        """
         desired_family = {}
 
         all_data = self.get_font_list(force_download=True)
@@ -53,7 +77,7 @@ class FontSquirrel():
         for family in all_data:
             if family['family_url'] == familia:
                 desired_family = family
-                break;
+                break
 
         font_filename = []
         for a in iter(desired_family['files'].items()):
@@ -70,21 +94,27 @@ class FontSquirrel():
         zip_file = zipfile.ZipFile(destination)
         print(font_filename)
         for filename in font_filename:
-            zip_file.extract(filename, path=destino+desired_family['family_url'])
+            zip_file.extract(filename,
+                             path=destino+desired_family['family_url'])
 
-    def get_font_list(self,force_download=False):
+    def get_font_list(self, force_download=False):
         """
+        Generates an array of fonts dictionaries. Each dictionary
+        has a structure like this:
         {
           'kind': 'fontsquirrel',
           'family': #family_name
           'family_url': #family_urlname
           'category': #Classification
           "variants" : [ "regular" .. "thin" ]
-          "files" : [
-          "regular" : "http...",
-          "thin" : "http...",
-          ]
+          "files" : {
+            "regular" : "http...",
+            "thin" : "http...",
+          }
         }
+        It can be used by others applications to download them or get
+        some information about fonts.
+        Is similar to Google's font api.
         """
         # return a list of dictionaries with info about fonts: families,
         # styles and how and where to download them
@@ -99,16 +129,20 @@ class FontSquirrel():
                 family_dict["family_url"] = family["family_urlname"]
                 family_dict["category"] = family["classification"]
 
-                family_data = self.family_download_json(family["family_urlname"])
+                family_data = self.family_download_json(
+                    family["family_urlname"])
 
-                variants =  []
+                variants = []
                 font_files = {}
 
                 for variant in family_data:
+                    if variant['style_name'] in font_files:
+                        # Not the better solution, but works
+                        font_files[str(variant['style_name'])
+                                   + "2"] = variant['filename']
 
-                    if variant['style_name'] in font_files :
-                        font_files[str(variant['style_name']) + "2"] = variant['filename']
                         variants.append(str(variant['style_name']) + "2")
+
                     else:
                         font_files[variant['style_name']] = variant['filename']
                         variants.append(variant['style_name'])
@@ -117,7 +151,7 @@ class FontSquirrel():
                 family_dict["files"] = font_files
 
                 data_to_return.append(family_dict)
-                logging.info("Retrieved data from %s family" % family_dict["family"])
+                logging.info("Got data from %s family" % family_dict["family"])
 
             # Save retrieved data to a file
             backup = open('localdata.txt', 'w')
@@ -134,13 +168,32 @@ class FontSquirrel():
             a = json.loads(data)
             return a
 
-    def all_json_data(self, force_download = False):
+    def all_json_data(self, force_download=False):
+        """
+        Retrieves all raw json data from Internet.
+        Pending implementation with cache
+        """
         url_api = "http://www.fontsquirrel.com/api/fontlist/all"
         request = urllib.request.urlopen(url_api)
         # print ("¿Force Downloading?" + str(force_download))
         return json.loads(request.read().decode('utf-8'))
 
+    def family_download_json(self, family):
+        """
+        Download json information from internet. It does not
+        save any data anywhere.
+        """
+        request = urllib.request.urlopen(self.family_download_url(family))
+        return json.loads(request.read().decode('utf-8'))
+
     def download_to(self, origin_url, destination_url):
+        """
+        Helper funtion that downloads a zip file from
+        origin url and saves to destination url.
+        It doesn't uses urllib.urlretrieve, in order it is
+        deprecated on Python 3.X
+        Returns: The path of downloaded file.
+        """
         logging.info("Downloading zip from %s" % origin_url)
         response = urllib.request.urlopen(origin_url)
         logging.debug("Download finished!")
@@ -159,9 +212,10 @@ class FontSquirrel():
         return destination_url
 
     def font_family_filenames(self, family):
-        "Retrieves a list of all filenames of font"
+        """
+        Retrieves a list of all filenames of font
+        """
         json_data = self.family_download_json(family)
-        # print(json_data[0])
 
         # number of families
         number = json_data[0]['family_count']
@@ -179,11 +233,7 @@ class FontSquirrel():
     def family_download_url(self, family):
         return "http://www.fontsquirrel.com/api/familyinfo/" + family
 
-    def family_download_json(self, family):
-        request = urllib.request.urlopen(self.family_download_url(family))
-        return json.loads(request.read().decode('utf-8'))
-
 a = FontSquirrel()
-#a.get_font_list()
-a.get_family("roboto","font/")
-#a.get_all_families("")
+# a.get_font_list()
+a.get_family("roboto", "font/")
+# a.get_all_families("")
