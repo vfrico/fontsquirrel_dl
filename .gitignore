@@ -1,3 +1,6 @@
 tmp/
 fonts/
 font/
+__pycache__/
+localdata.py~
+localjson.py~
