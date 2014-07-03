@@ -3,6 +3,8 @@ fontsquirrel_downloader
 
 This is a Python 3.x library which provides an easy access to [FontSquirrel API](http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api).
 
+Some cache is stored to get data faster.
+
 ##Documentation
 This library allows to:
 

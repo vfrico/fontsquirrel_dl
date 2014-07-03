@@ -44,7 +44,7 @@ class FontSquirrel():
 
         if dest == "":
             dest = "fonts/"
-        #print(all_data)
+
         for font in all_data:
             # For each font listed, get the former name (to save the zip,
             # the url_name (used for api management) and a list of
@@ -120,7 +120,7 @@ class FontSquirrel():
         # return a list of dictionaries with info about fonts: families,
         # styles and how and where to download them
         if force_download:
-            logging.info("Force Download is True. Downloading new data")
+            logging.info("Downloading new data")
             all_data = self.all_json_data()
             data_to_return = []
             for family in all_data:
@@ -162,12 +162,17 @@ class FontSquirrel():
             return data_to_return
         else:
             # Open retrieved data
-            backup = open('localdata.txt', 'r')
-            data = backup.read()
-            backup.close()
+            try:
+                backup = open('localdata.txt', 'r')
+                data = backup.read()
+                backup.close()
+                dictionary = json.loads(data)
 
-            a = json.loads(data)
-            return a
+            except FileNotFoundError:
+                logging.info("Couldn't locate localdata.txt. Forcing download")
+                self.get_font_list(force_download=True)
+
+            return dictionary
 
     def all_json_data(self, force_download=False):
         """
@@ -233,9 +238,3 @@ class FontSquirrel():
 
     def family_download_url(self, family):
         return "http://www.fontsquirrel.com/api/familyinfo/" + family
-
-#a = FontSquirrel()
-# a.get_font_list()
-#a.get_family("roboto", "font/")
-#a.get_all_families("")
-FontSquirrel().get_all_families("")
