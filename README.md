@@ -1,4 +1,4 @@
-fontsquirrel_downloader
+fontsquirrel_dl
 =========================
 
 This is a Python 3.x library which provides an easy access to [FontSquirrel API](http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api).
