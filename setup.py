@@ -3,7 +3,7 @@ setup(
     name = "fontsquirrel-dl",
     version = "0.1",
     packages = find_packages(),
-    scripts = ['say_hello.py'],
+    py_modules = ['fontsquirrel'],
 
     # Project uses reStructuredText, so ensure that the docutils get
     # installed or upgraded on the target machine

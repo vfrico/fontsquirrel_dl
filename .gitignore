@@ -4,3 +4,6 @@ font/
 __pycache__/
 localdata.py~
 localjson.py~
+build/
+dist/
+fontsquirrel_dl.egg-info/
