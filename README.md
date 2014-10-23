@@ -17,7 +17,7 @@ Font Squirrel's API allows access to free and open fonts. All fonts which needs 
 It takes one argument: the folder where you want to download and extract the fonts.
 
     import FontSquirrel
-    FontSquirrel.get_all_families("Fonts/")
+    FontSquirrel.get_family("raleway",'font/')
 
 ### #2: Download one family from FontSquirrel
 Once you know the url_name for the font you want, you can use the get_family() function. Takes one argument: the folder where you have to download.
@@ -38,4 +38,4 @@ You can get the data from FontSquirrel on a similar way that Google provides wit
          "thin" : "Family-variant2.otf",
       }
         
-The files must be looked into the zip.
+The files are placed into the zip associated to the family.
