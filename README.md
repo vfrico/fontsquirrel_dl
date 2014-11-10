@@ -39,3 +39,11 @@ You can get the data from FontSquirrel on a similar way that Google provides wit
       }
         
 The files are placed into the zip associated to the family.
+
+##API
+
+### Download one family from FontSquirrel
+Once you know the url_name for the font you want, you can use the get_family() function. Takes one argument: the folder where you have to download.
+
+    import FontSquirrel
+    FontSquirrel.get_family("raleway",'font/')

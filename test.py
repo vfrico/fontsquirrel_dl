@@ -4,7 +4,7 @@
 #a.get_all_families("")
 
 from fontsquirrel import FontSquirrel
-a = FontSquirrel().get_font_list(force_download=False)
+a = FontSquirrel().get_font_list(force_download=True)
 fuente = input("Busca esta fuente: ")
 
 found = False

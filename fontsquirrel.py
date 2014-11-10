@@ -20,13 +20,43 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 #
 # MORE INFO:
-#   Api DOCS: <http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api>
+#   Api DOCS: 
+#     <http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api>
 import json
 import shutil
 import os
 import urllib.request
 import logging
 import zipfile
+
+class FoldersToSave():
+    # Home directory of user
+    userfolder = os.path.expanduser("~")
+    
+    def join_path_with_home(self, path_to_join):
+        """Returns folder and creates recursively
+        the directory on filesystem"""
+        directory = os.path.join(self.userfolder, path_to_join)
+        
+        # Creates recursively directory. Last argument prevents OSError
+        os.makedirs(directory, exist_ok=True)
+        return directory
+    
+    def cache(self, file_cache = None):
+        """Default dir to save font cache"""
+        if file_cache != None:
+            return self.join_path_with_home(".config/FontSquirrel_dl/cache")
+        else:
+            return self.join_path_with_home(
+                ".config/FontSquirrel_dl/cache/"+file_cache)
+
+    def font(self):
+        """Default dir to save downloaded fonts"""
+        return self.join_path_with_home(".fonts/FontSquirrel/")
+    
+    def tmp(self):
+        """Default dir to use temporally"""
+        return self.join_path_with_home(".config/FontSquirrel_dl/tmp")
 
 
 logging.basicConfig(level=logging.INFO)
@@ -89,8 +119,8 @@ class FontSquirrel():
                 data_to_return.append(family_dict)
                 logging.info("Got data from %s family" % family_dict["family"])
 
-            # Save retrieved data to a file
-            backup = open('localdata.txt', 'w')
+            # Save retrieved data to a file as cache
+            backup = open(FoldersToSave.cache(file_cache='localdata.txt'), 'w')
             backup.write(json.dumps(data_to_return))
             backup.close()
 
