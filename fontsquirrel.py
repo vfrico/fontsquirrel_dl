@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+# -*- coding:UTF-8 -*-
 #   File: fontsquirrel.py
 #   Abstract class for downloading fonts from fontsquirrel
 #
@@ -89,7 +89,7 @@ class FontSquirrel():
             all_data = self.all_json_data()
             data_to_return = []
             for family in all_data:
-                family_dict = {}
+                family_dict = dict()
                 family_dict["kind"] = "fontsquirrel"
                 family_dict["family"] = family["family_name"]
                 family_dict["family_url"] = family["family_urlname"]
@@ -127,6 +127,7 @@ class FontSquirrel():
             return data_to_return
         else:
             # Open retrieved data
+            dictionary = {}
             try:
                 backup = open('localdata.txt', 'r')
                 data = backup.read()
@@ -139,14 +140,15 @@ class FontSquirrel():
 
             return dictionary
 
-    def all_json_data(self, force_download=False):
+    @staticmethod
+    def all_json_data(force_download=False):
         """
         Retrieves all raw json data from Internet.
         Pending implementation with cache
         """
         url_api = "http://www.fontsquirrel.com/api/fontlist/all"
         request = urllib.request.urlopen(url_api)
-        # print ("¿Force Downloading?" + str(force_download))
+        print("¿Force Downloading?" + str(force_download))
         return json.loads(request.read().decode('utf-8'))
 
     def get_all_families(self, dest):
@@ -157,7 +159,7 @@ class FontSquirrel():
         Returns: Full path of folder containing the fonts
         """
         all_data = self.all_json_data()
-
+        destination = None
         if dest == "":
             dest = "fonts/"
 
@@ -222,7 +224,8 @@ class FontSquirrel():
         request = urllib.request.urlopen(self.family_download_url(family))
         return json.loads(request.read().decode('utf-8'))
 
-    def download_to(self, origin_url, destination_url):
+    @staticmethod
+    def download_to(origin_url, destination_url):
         """
         Helper funtion that downloads a zip file from
         origin url and saves to destination url.
@@ -239,9 +242,9 @@ class FontSquirrel():
         except FileNotFoundError:
             logging.warning("FileNotFoundError exception: \
                   Creating needed folders")
-            dirsToCreate = os.path.abspath(destination_url)
-            logging.debug("Folder to create:" + str(dirsToCreate))
-            os.makedirs(os.path.dirname(dirsToCreate))
+            dirs_to_create = os.path.abspath(destination_url)
+            logging.debug("Folder to create:" + str(dirs_to_create))
+            os.makedirs(os.path.dirname(dirs_to_create))
             file_out = open(destination_url, 'wb')
 
         shutil.copyfileobj(response, file_out)
@@ -255,7 +258,7 @@ class FontSquirrel():
         json_data = self.family_download_json(family)
 
         # number of families
-        number = json_data[0]['family_count']
+        # number = json_data[0]['family_count']
 
         all_filenames = []
 
@@ -264,8 +267,10 @@ class FontSquirrel():
 
         return all_filenames
 
-    def font_download_url(self, font_url_name):
+    @staticmethod
+    def font_download_url(font_url_name):
         return "http://www.fontsquirrel.com/fonts/download/" + font_url_name
 
-    def family_download_url(self, family):
+    @staticmethod
+    def family_download_url(family):
         return "http://www.fontsquirrel.com/api/familyinfo/" + family
