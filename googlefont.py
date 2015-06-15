@@ -4,8 +4,10 @@ jsonfile = fi.read()
 import json, os
 import urllib.request
 import shutil
+
+#String used to delete the previous line on "download"
 blstring = ""
-for i in range(0,86):
+for i in range(0,79):
     blstring += " "
 
 class GoogleFont():
@@ -31,14 +33,12 @@ class GoogleFont():
         itemsFont = json.loads(jsonfile)['items']
         for family in itemsFont:
             family_name = family['family'].replace(' ', '-').lower()
-            print(family_name)
             directories.append(family_name)
             for file in family['files']:
                 ext = family['files'][file].split('.')[-1]
                 font = ["/"+family_name+"/"+family_name+"-"+file+"."+ext,
                     family['files'][file]]
                 files.append(font)
-                print(font)
         return files
 
 
@@ -58,7 +58,7 @@ class GoogleFont():
             self.number_downloaded += 1
             pc = self.number_downloaded / len(files) * 100
             print(blstring,end="\r")
-            print("Downloading {1} of {2} ... {3:.1f}%. File: {0}".format(file[0],self.number_downloaded,len(files),pc),end="\r")
+            print("Downloading {1} of {2} ... {3:.1f}%. File: {0}...".format(file[0][:36],self.number_downloaded,len(files),pc),end="\r")
         print ("\nDone")
 
     def download_all(self,dest):
