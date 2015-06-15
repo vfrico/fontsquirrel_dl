@@ -4,8 +4,26 @@ jsonfile = fi.read()
 import json, os
 import urllib.request
 import shutil
+blstring = ""
+for i in range(0,86):
+    blstring += " "
+
 class GoogleFont():
     number_downloaded = 0
+
+    def get_updated_json(self):
+        url = "https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBDjNcwLIS77aqQstOdqrFDobzuihtwRVI"
+        response = urllib.request.urlopen(url)
+        dest = "./localdata.json"
+        try:
+            file_out = open(dest, 'wb')
+        except FileNotFoundError:
+            dirs_to_create = os.path.abspath(dest)
+            os.makedirs(os.path.dirname(dirs_to_create))
+            file_out = open(dest, 'wb')
+
+        shutil.copyfileobj(response, file_out)
+        return dest
 
     def extract_data_from_json(self,jsonfile):
         directories = []
@@ -39,16 +57,16 @@ class GoogleFont():
 
             self.number_downloaded += 1
             pc = self.number_downloaded / len(files) * 100
-            print("                                                                                                          ",end="\r")
+            print(blstring,end="\r")
             print("Downloading {1} of {2} ... {3:.1f}%. File: {0}".format(file[0],self.number_downloaded,len(files),pc),end="\r")
         print ("\nDone")
+
+    def download_all(self,dest):
+        file = self.get_updated_json()
+        fi = open(file,'r')
+        jsonfile = fi.read()
+        fontfiles = self.extract_data_from_json(jsonfile)
+        self.download_families(fontfiles,dest)
+
 a = GoogleFont()
-
-
-filess= a.extract_data_from_json(jsonfile)
-
-print(len(filess))
-
-
-
-a.download_families(filess,"goog")
+a.download_all("gogfont")
