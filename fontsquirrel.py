@@ -20,7 +20,7 @@
 #   along with this program. If not, see <http://www.gnu.org/licenses/>
 #
 # MORE INFO:
-#   Api DOCS: 
+#   Api DOCS:
 #     <http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api>
 import json
 import shutil
@@ -212,11 +212,12 @@ class FontSquirrel():
         destination = self.download_to(
             download_uri, "tmp/%s.zip" % desired_family['family'])
 
+        destino = os.path.abspath(os.path.expanduser(destino + desired_family['family_url']))
         zip_file = zipfile.ZipFile(destination)
         # Extract all files from given zip
         for filename in font_filename:
             zip_file.extract(filename,
-                             path=destino+desired_family['family_url'])
+                             path=destino)
         return font_filename
 
     def family_download_json(self, family):
@@ -255,7 +256,7 @@ class FontSquirrel():
 
     def font_family_filenames(self, family):
         """
-        Given a parameter "family", returns a list with the file names 
+        Given a parameter "family", returns a list with the file names
         which are part of the font.
         """
         json_data = self.family_download_json(family)
