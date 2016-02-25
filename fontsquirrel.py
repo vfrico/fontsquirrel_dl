@@ -32,19 +32,22 @@ import zipfile
 class FoldersToSave():
     # Home directory of user
     userfolder = os.path.expanduser("~")
-    
+
+    def getFontSquirrel(self):
+        return os.path.join(self.cache(file_cache='fontsquirrel'), "data.json")
+
     def join_path_with_home(self, path_to_join):
         """Returns folder and creates recursively
         the directory on filesystem"""
         directory = os.path.join(self.userfolder, path_to_join)
-        
+
         # Creates recursively directory. Last argument prevents OSError
         os.makedirs(directory, exist_ok=True)
         return directory
-    
+
     def cache(self, file_cache = None):
         """Default dir to save font cache"""
-        if file_cache != None:
+        if file_cache == None:
             return self.join_path_with_home(".config/FontSquirrel_dl/cache")
         else:
             return self.join_path_with_home(
@@ -53,7 +56,7 @@ class FoldersToSave():
     def font(self):
         """Default dir to save downloaded fonts"""
         return self.join_path_with_home(".fonts/FontSquirrel/")
-    
+
     def tmp(self):
         """Default dir to use temporally"""
         return self.join_path_with_home(".config/FontSquirrel_dl/tmp")
@@ -103,7 +106,7 @@ class FontSquirrel():
 
                 for variant in family_data:
                     if variant['style_name'] in font_files:
-                        # Not the better solution, but works
+                        # Not the best solution, but works
                         font_files[str(variant['style_name'])
                                    + "2"] = variant['filename']
 
@@ -120,7 +123,7 @@ class FontSquirrel():
                 logging.info("Got data from %s family" % family_dict["family"])
 
             # Save retrieved data to a file as cache
-            backup = open(FoldersToSave.cache(file_cache='localdata.txt'), 'w')
+            backup = open(FoldersToSave().getFontSquirrel(), 'w')
             backup.write(json.dumps(data_to_return))
             backup.close()
 
@@ -129,7 +132,7 @@ class FontSquirrel():
             # Open retrieved data
             dictionary = {}
             try:
-                backup = open('localdata.txt', 'r')
+                backup = open(FoldersToSave().getFontSquirrel(), 'r')
                 data = backup.read()
                 backup.close()
                 dictionary = json.loads(data)
@@ -155,7 +158,7 @@ class FontSquirrel():
         """
         Given a parameter "dest" (must be a directory), downloads all
         fonts available on FontSquirrel to folder "dest".
-        
+
         Returns: Full path of folder containing the fonts
         """
         all_data = self.all_json_data()
