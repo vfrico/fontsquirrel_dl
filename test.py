@@ -3,10 +3,15 @@
 # a.get_font_list()
 # a.get_family("roboto", "font/")
 # a.get_all_families("")
-
+import warnings
 from fontsquirrel import FontSquirrel
+
+# Importing this method can throw a console warning
+warnings.filterwarnings("ignore")
 from fuzzywuzzy import fuzz
 # from fuzzywuzzy import process
+warnings.filterwarnings("default")
+
 
 def font_downloader(font_name=None, font_path="~/.fonts/font_downloader/"):
     # All families from fontsquirrel_downloader

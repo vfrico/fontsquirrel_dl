@@ -4,7 +4,7 @@
 #   Abstract class for downloading fonts from fontsquirrel
 #
 #   This file is part of fontsquirrel_downloader
-#   Pimagizer (C) 2014 Víctor Fernández Rico <vfrico@gmail.com>
+#   Pimagizer (C) 2014-2016 Víctor Fernández Rico <vfrico@gmail.com>
 #
 #   This is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published
@@ -29,6 +29,7 @@ import urllib.request
 import logging
 import zipfile
 
+
 class FoldersToSave():
     # Home directory of user
     userfolder = os.path.expanduser("~")
@@ -44,6 +45,7 @@ class FoldersToSave():
         # Creates recursively directory. Last argument prevents OSError
         os.makedirs(directory, exist_ok=True)
         return directory
+
 
     def cache(self, file_cache = None):
         """Default dir to save font cache"""
@@ -107,8 +109,8 @@ class FontSquirrel():
                 for variant in family_data:
                     if variant['style_name'] in font_files:
                         # Not the best solution, but works
-                        font_files[str(variant['style_name'])
-                                   + "2"] = variant['filename']
+                        font_files[str(variant['style_name']) +
+                                   "2"] = variant['filename']
 
                         variants.append(str(variant['style_name']) + "2")
 
@@ -252,6 +254,7 @@ class FontSquirrel():
             file_out = open(destination_url, 'wb')
 
         shutil.copyfileobj(response, file_out)
+        file_out.close()
         return destination_url
 
     def font_family_filenames(self, family):
