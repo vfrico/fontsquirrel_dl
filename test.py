@@ -16,7 +16,7 @@ def font_downloader(font_name = None, font_path="~/.fonts/font_downloader/"):
     if not font_name:
         font_name = input("Introduce la fuente a buscar: ")
 
-    process.extract("new york jets", families, limit=5)
+    matches = process.extract(font_name, families, limit=5)
 
     if len(matches) == 1:
         FontSquirrel().get_family(matches[0], font_path)
