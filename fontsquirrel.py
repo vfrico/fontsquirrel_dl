@@ -28,7 +28,7 @@ import os
 import urllib.request
 import logging
 import zipfile
-
+import threading
 
 class FoldersToSave():
     # Home directory of user
@@ -68,7 +68,40 @@ logging.basicConfig(level=logging.INFO)
 
 
 class FontSquirrel():
-    def get_font_list(self, force_download=False):
+    def __init__(self):
+        self.threadLimiter = threading.Semaphore(4)
+    def __download_info_family__(self, family, callback):
+        family_dict = dict()
+        family_dict["kind"] = "fontsquirrel"
+        family_dict["family"] = family["family_name"]
+        family_dict["family_url"] = family["family_urlname"]
+        family_dict["category"] = family["classification"]
+        self.threadLimiter.acquire()
+        family_data = self.family_download_json(family["family_urlname"])
+        self.threadLimiter.release()
+        variants = []
+        font_files = {}
+
+        for variant in family_data:
+            if variant['style_name'] in font_files:
+                # Not the best solution, but works
+                font_files[str(variant['style_name']) +
+                           "2"] = variant['filename']
+
+                variants.append(str(variant['style_name']) + "2")
+
+            else:
+                font_files[variant['style_name']] = variant['filename']
+                variants.append(variant['style_name'])
+
+        family_dict["variants"] = variants
+        family_dict["files"] = font_files
+
+        callback(family_dict)
+        logging.info("Got data from %s family" % family_dict["family"])
+
+
+    def get_font_list(self, force_download=True, use_threads=True):
         """
         Generates an array of fonts dictionaries. Each dictionary
         has a structure like this:
@@ -93,37 +126,22 @@ class FontSquirrel():
             logging.info("Downloading new data")
             all_data = self.all_json_data()
             data_to_return = []
-            for family in all_data:
-                family_dict = dict()
-                family_dict["kind"] = "fontsquirrel"
-                family_dict["family"] = family["family_name"]
-                family_dict["family_url"] = family["family_urlname"]
-                family_dict["category"] = family["classification"]
 
-                family_data = self.family_download_json(
-                    family["family_urlname"])
+            append_to = lambda dict: data_to_return.append(dict)
+            threads = []
+            if use_threads:
+                for family in all_data:
+                    t = threading.Thread(
+                        target=self.__download_info_family__,
+                        args=(family, append_to, ))
+                    threads.append(t)
+                    t.start()
 
-                variants = []
-                font_files = {}
-
-                for variant in family_data:
-                    if variant['style_name'] in font_files:
-                        # Not the best solution, but works
-                        font_files[str(variant['style_name']) +
-                                   "2"] = variant['filename']
-
-                        variants.append(str(variant['style_name']) + "2")
-
-                    else:
-                        font_files[variant['style_name']] = variant['filename']
-                        variants.append(variant['style_name'])
-
-                family_dict["variants"] = variants
-                family_dict["files"] = font_files
-
-                data_to_return.append(family_dict)
-                logging.info("Got data from %s family" % family_dict["family"])
-
+                for t in threads:
+                    t.join()
+            else:
+                for family in all_data:
+                    self.__download_info_family__(family, append_to)
             # Save retrieved data to a file as cache
             backup = open(FoldersToSave().getFontSquirrel(), 'w')
             backup.write(json.dumps(data_to_return))
@@ -214,7 +232,8 @@ class FontSquirrel():
         destination = self.download_to(
             download_uri, "tmp/%s.zip" % desired_family['family'])
 
-        destino = os.path.abspath(os.path.expanduser(destino + desired_family['family_url']))
+        destino = os.path.abspath(
+            os.path.expanduser(destino + desired_family['family_url']))
         zip_file = zipfile.ZipFile(destination)
         # Extract all files from given zip
         for filename in font_filename:
