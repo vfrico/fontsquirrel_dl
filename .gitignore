@@ -10,3 +10,6 @@ fontsquirrel_dl.egg-info/
 fontsquirrel.html
 *.pyc
 localdata.json
+
+# Ignore developement environment (PyCharm)
+.idea/
