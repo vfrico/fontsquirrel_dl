@@ -1,0 +1,15 @@
+tmp/
+fonts/
+font/
+__pycache__/
+localdata.py~
+localjson.py~
+build/
+dist/
+fontsquirrel_dl.egg-info/
+fontsquirrel.html
+*.pyc
+localdata.json
+
+# Ignore developement environment (PyCharm)
+.idea/

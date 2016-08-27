@@ -23,6 +23,7 @@
 #   Api DOCS:
 #     <http://www.fontsquirrel.com/blog/2010/12/the-font-squirrel-api>
 """Abstract class for downloading fonts from fontsquirrel."""
+
 import json
 import shutil
 import os
@@ -34,7 +35,7 @@ import threading
 
 class FoldersToSave():
     """Utility class to get standard folder destinations."""
-
+    # Home directory of user
     userfolder = os.path.expanduser("~")
 
     def getFontSquirrel(self):
