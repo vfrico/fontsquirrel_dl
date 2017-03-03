@@ -27,3 +27,4 @@ setup(
     # could also include long_description, download_url, classifiers, etc.
 )
 ## DEPENDS fuzzywuzzy
+requires = ['fuzzywuzzy', 'python-Levenshtein']

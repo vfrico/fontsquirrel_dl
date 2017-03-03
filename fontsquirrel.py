@@ -30,7 +30,8 @@ import os
 import urllib.request
 import logging
 import zipfile
-import threading
+# import threading
+import multiprocessing
 
 
 class FoldersToSave():
@@ -74,17 +75,17 @@ class FontSquirrel():
     """Abstract class for downloading fonts from fontsquirrel."""
 
     def __init__(self):
-        self.threadLimiter = threading.Semaphore(90)
+        pass
 
-    def __download_info_family__(self, family, callback):
+    def __download_info_family__(self, family):
+        print ("hoola estoy descargando!!")
         family_dict = dict()
         family_dict["kind"] = "fontsquirrel"
         family_dict["family"] = family["family_name"]
         family_dict["family_url"] = family["family_urlname"]
         family_dict["category"] = family["classification"]
-        self.threadLimiter.acquire()
         family_data = self.family_download_json(family["family_urlname"])
-        self.threadLimiter.release()
+
         variants = []
         font_files = {}
 
@@ -103,8 +104,8 @@ class FontSquirrel():
         family_dict["variants"] = variants
         family_dict["files"] = font_files
 
-        callback(family_dict)
         logging.info("Got data from %s family" % family_dict["family"])
+        return family_dict
 
     def get_font_list(self, force_download=True, use_threads=True):
         """
@@ -131,23 +132,10 @@ class FontSquirrel():
             logging.info("Downloading new data")
             all_data = self.all_json_data()
             data_to_return = []
+            # print(multiprocessing.cpu_count()*10)
+            with multiprocessing.Pool(multiprocessing.cpu_count()*5) as p:
+                data_to_return = p.map(self.__download_info_family__, all_data)
 
-            append_to = lambda dict: data_to_return.append(dict)
-            threads = []
-            if use_threads:
-                for family in all_data:
-                    t = threading.Thread(
-                        target=self.__download_info_family__,
-                        args=(family, append_to, ))
-                    threads.append(t)
-                    t.start()
-
-                for t in threads:
-                    t.join()
-            else:
-                for family in all_data:
-                    self.__download_info_family__(family, append_to)
-            # Save retrieved data to a file as cache
             backup = open(FoldersToSave().getFontSquirrel(), 'w')
             backup.write(json.dumps(data_to_return))
             backup.close()
@@ -217,7 +205,7 @@ class FontSquirrel():
         """
         desired_family = {}
 
-        all_data = self.get_font_list()
+        all_data = self.get_font_list(force_download=False)
 
         for family in all_data:
             if family['family_url'] == familia:
